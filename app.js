@@ -1,8 +1,7 @@
-// Простое SPA на ванильном JS
+// SPA на ванильном JS (фикс статичного порядка ответов и завершения через «Далее»)
 const $ = (s) => document.querySelector(s);
-const $$ = (s) => Array.from(document.querySelectorAll(s));
 
-// Элементы
+// Экраны и элементы
 const loginEl = $("#login");
 const welcomeEl = $("#welcome");
 const quizEl = $("#quiz");
@@ -30,19 +29,19 @@ const reportMetaEl = $("#reportMeta");
 const reportSummaryEl = $("#reportSummary");
 const reportDetailsEl = $("#reportDetails");
 
-const STORAGE_KEY = "retei_exam_v1";
+const STORAGE_KEY = "retei_exam_v2";
 
 let state = {
-  employee: null,  // {name, role}
-  startedAt: null, // timestamp (ms)
+  employee: null,
+  startedAt: null,
   finishedAt: null,
   currentIndex: 0,
-  answers: {},     // {questionId: answerText}
-  order: [],       // shuffled question ids
+  answers: {},        // {questionId: answerText}
+  order: [],          // порядок вопросов
+  answerOrder: {},    // {questionId: [answerText...]} — фиксированный порядок вариантов
   questions: [],
 };
 
-// Таймер: 30 минут
 const DURATION_MS = 30 * 60 * 1000;
 let tickInterval = null;
 
@@ -80,7 +79,6 @@ function startTicking(){
 }
 
 function show(section){
-  // hide all
   [loginEl, welcomeEl, quizEl, reportEl].forEach(el => el.classList.add("hidden"));
   section.classList.remove("hidden");
 }
@@ -91,7 +89,6 @@ async function loadQuestions(){
   state.questions = json;
 }
 
-// Перемешивание (Fisher-Yates)
 function shuffle(arr){
   const a = arr.slice();
   for(let i=a.length-1;i>0;i--){
@@ -101,29 +98,43 @@ function shuffle(arr){
   return a;
 }
 
+function ensureAnswerOrder(){
+  // создаём фиксированный порядок ответов для каждого вопроса один раз при старте
+  state.answerOrder = {};
+  state.questions.forEach(q => {
+    const fixed = shuffle(q.answers).map(a => a.text);
+    state.answerOrder[q.id] = fixed;
+  });
+}
+
 function startExam(){
   state.startedAt = Date.now();
   state.finishedAt = null;
   state.currentIndex = 0;
   state.answers = {};
   state.order = shuffle(state.questions.map(q => q.id));
+  ensureAnswerOrder();
   persist();
   renderQuestion();
   show(quizEl);
   startTicking();
 }
 
+function getQuestionByIndex(i){
+  const qid = state.order[i];
+  return state.questions.find(x => x.id === qid);
+}
+
 function renderQuestion(){
-  const qid = state.order[state.currentIndex];
-  const q = state.questions.find(x => x.id === qid);
+  const q = getQuestionByIndex(state.currentIndex);
   if(!q) return;
   progressText.textContent = `Вопрос ${state.currentIndex+1} / ${state.questions.length}`;
   questionText.textContent = q.text;
 
-  // соберём варианты и перемешаем
-  const shuffled = shuffle(q.answers);
+  const fixedTexts = state.answerOrder[q.id]; // массив текстов в фиксированном порядке
   answersEl.innerHTML = "";
-  shuffled.forEach(ans => {
+  fixedTexts.forEach(txt => {
+    const ans = q.answers.find(a => a.text === txt);
     const div = document.createElement("div");
     div.className = "answer";
     div.textContent = ans.text;
@@ -133,13 +144,19 @@ function renderQuestion(){
     div.addEventListener("click", () => {
       state.answers[q.id] = ans.text;
       persist();
+      // просто перерисуем выделение без смены порядка
       renderQuestion();
     });
     answersEl.appendChild(div);
   });
 
+  // Кнопки навигации
   prevBtn.disabled = state.currentIndex === 0;
-  nextBtn.disabled = state.currentIndex >= state.questions.length - 1;
+  if(state.currentIndex >= state.questions.length - 1){
+    nextBtn.textContent = "Закончить";
+  }else{
+    nextBtn.textContent = "Далее";
+  }
 }
 
 function goPrev(){
@@ -149,8 +166,10 @@ function goPrev(){
     renderQuestion();
   }
 }
-function goNext(){
-  if(state.currentIndex < state.questions.length - 1){
+function goNextOrFinish(){
+  if(state.currentIndex >= state.questions.length - 1){
+    finishExam();
+  } else {
     state.currentIndex++;
     persist();
     renderQuestion();
@@ -169,11 +188,10 @@ function finishExam(){
   buildReport();
   show(reportEl);
   if(tickInterval) clearInterval(tickInterval);
-  updateTimer(); // freeze display
+  updateTimer();
 }
 
 function buildReport(){
-  // собрать результаты
   const meta = [];
   meta.push(`<div><b>Сотрудник:</b> ${state.employee?.name ?? "—"}</div>`);
   meta.push(`<div><b>Должность:</b> ${state.employee?.role ?? "—"}</div>`);
@@ -216,7 +234,6 @@ function buildReport(){
 }
 
 function resetAll(){
-  // Полный сброс
   localStorage.removeItem(STORAGE_KEY);
   location.reload();
 }
@@ -225,12 +242,13 @@ async function init(){
   loadPersisted();
   await loadQuestions();
 
-  // Если пользователь уже залогинен
   if(state.employee){
-    // Если уже начинали и не закончили — продолжаем
     if(state.startedAt && !state.finishedAt){
       startTicking();
       show(quizEl);
+      if(!state.answerOrder || Object.keys(state.answerOrder).length === 0){
+        ensureAnswerOrder();
+      }
       renderQuestion();
     } else if(state.finishedAt){
       show(reportEl);
@@ -245,6 +263,7 @@ async function init(){
   updateTimer();
 }
 
+// Слушатели
 loginBtn.addEventListener("click", () => {
   const name = empNameInput.value.trim();
   const role = empRoleInput.value.trim();
@@ -259,7 +278,6 @@ loginBtn.addEventListener("click", () => {
 
 startBtn.addEventListener("click", () => {
   if(state.startedAt && !state.finishedAt){
-    // Уже идёт — просто покажем тест
     show(quizEl);
     renderQuestion();
     return;
@@ -267,16 +285,13 @@ startBtn.addEventListener("click", () => {
   startExam();
 });
 
-prevBtn.addEventListener("click", goPrev);
-nextBtn.addEventListener("click", goNext);
-finishBtn.addEventListener("click", finishExam);
+prevBtn.addEventListener("click", () => goPrev());
+nextBtn.addEventListener("click", () => goNextOrFinish());
+finishBtn.addEventListener("click", () => finishExam());
 
-printBtn.addEventListener("click", () => {
-  window.print();
-});
+printBtn.addEventListener("click", () => window.print());
 
 shareBtn.addEventListener("click", async () => {
-  // Поделиться текстом итога; файл PDF пользователь может приложить после «Скачать PDF»
   const started = new Date(state.startedAt).toLocaleString();
   const finished = new Date(state.finishedAt).toLocaleString();
   const total = state.questions.length;

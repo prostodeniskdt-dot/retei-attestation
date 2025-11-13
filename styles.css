@@ -128,12 +128,3 @@ input[type="text"]{
   opacity:.9;
   border-top:1px solid var(--border);
 }
-
-/* Подключение собственного шрифта при желании:
-@font-face{
-  font-family:'InterCyr';
-  src: url('./assets/Inter-VariableFont.woff2') format('woff2');
-  font-weight:100 900; font-style:normal; font-display:swap;
-}
-body{ font-family:'InterCyr', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, 'Noto Sans', 'PT Sans', sans-serif }
-*/
