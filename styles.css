@@ -128,3 +128,40 @@ input[type="text"]{
   opacity:.9;
   border-top:1px solid var(--border);
 }
+
+
+/* === Mobile responsiveness tweaks === */
+@media (max-width: 920px){
+  .app{ padding:16px }
+  .app__header{ gap:10px; padding:10px 12px }
+  .logo{ height:32px }
+}
+
+@media (max-width: 640px){
+  body{ font-size: 16px }
+  .app{ max-width: 100%; padding:12px }
+  .card{ padding:16px; margin-bottom:12px }
+
+  .app__header{ flex-wrap:wrap; gap:8px }
+  .app__header h1{ font-size:20px; margin:0 }
+  .timer{ min-width:auto; padding:6px 10px; font-size:14px }
+
+  .form-row input[type="text"]{ width:100%; font-size:16px } /* prevent iOS zoom */
+  .btn{ width:100%; padding:12px 14px; font-size:16px }
+
+  .answers{ gap:10px }
+  .answer{ padding:14px; line-height:1.25 }
+
+  .quiz__nav{ flex-direction: column; gap:10px }
+  .quiz__finish{ margin-top:10px }
+  .quiz__progress{ font-size:14px }
+
+  /* report */
+  #report .report__details .detail{ margin-bottom:12px }
+}
+
+@media (max-width: 380px){
+  .app__header h1{ font-size:18px }
+  .timer{ font-size:13px }
+  .answer{ padding:12px }
+}
