@@ -1,0 +1,9 @@
+/* Печатные стили: прячем лишнее, отчёт делаем чистым */
+@media print{
+  body{ background:#fff; color:#000 }
+  .app__header, .no-print, #login, #welcome, #quiz, .app__footer { display:none !important }
+  #report{ display:block !important; border:none; box-shadow:none; }
+  #report h2{ color:#000 }
+  .report__details .correct{ color: #0a7d00 }
+  .report__details .wrong{ color: #b00020 }
+}

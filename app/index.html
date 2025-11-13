@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Рётэй — Аттестация</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./print.css" media="print" />
+</head>
+<body>
+  <div class="app">
+    <header class="app__header">
+      <img src="./assets/logo.svg" alt="Рётэй" class="logo" />
+      <h1>Аттестация «Рётэй»</h1>
+      <div class="timer" id="timer">30:00</div>
+    </header>
+
+    <!-- Личный кабинет (вход) -->
+    <section id="login" class="card">
+      <h2>Вход</h2>
+      <div class="form-row">
+        <label>Имя сотрудника</label>
+        <input id="empName" type="text" placeholder="Иван Иванов" />
+      </div>
+      <div class="form-row">
+        <label>Должность</label>
+        <input id="empRole" type="text" placeholder="Бар-менеджер" />
+      </div>
+      <button id="loginBtn" class="btn btn--primary">Войти</button>
+    </section>
+
+    <!-- Экран запуска -->
+    <section id="welcome" class="card hidden">
+      <h2>Аттестация по меню</h2>
+      <p>Нажмите «Начать», чтобы запустить 30‑минутный таймер. После начала сброс невозможен до завершения.</p>
+      <button id="startBtn" class="btn btn--primary">Начать</button>
+    </section>
+
+    <!-- Экран вопроса -->
+    <section id="quiz" class="card hidden">
+      <div class="quiz__progress">
+        <span id="progressText">Вопрос 1 / 1</span>
+      </div>
+      <h3 id="questionText">Текст вопроса</h3>
+      <div id="answers" class="answers"></div>
+      <div class="quiz__nav">
+        <button id="prevBtn" class="btn btn--ghost">Назад</button>
+        <button id="nextBtn" class="btn btn--primary">Далее</button>
+      </div>
+      <div class="quiz__finish">
+        <button id="finishBtn" class="btn btn--danger">Закончить</button>
+      </div>
+    </section>
+
+    <!-- Отчёт -->
+    <section id="report" class="card hidden">
+      <h2>Отчёт об аттестации</h2>
+      <div id="reportMeta" class="report__meta"></div>
+      <div id="reportSummary" class="report__summary"></div>
+      <div id="reportDetails" class="report__details"></div>
+      <div class="report__actions no-print">
+        <button id="shareBtn" class="btn btn--primary">Поделиться</button>
+        <button id="printBtn" class="btn btn--ghost">Скачать PDF</button>
+        <button id="resetBtn" class="btn btn--danger">Сбросить и выйти</button>
+      </div>
+    </section>
+
+    <footer class="app__footer">
+      <span>© Рётэй</span>
+    </footer>
+  </div>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
