@@ -1,6 +1,6 @@
 /* Печатные стили: прячем лишнее, отчёт делаем чистым */
 @media print{
-  body{ background:#fff; color:#000 }
+  body{ background:#fff; color:#000; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, 'Noto Sans', 'PT Sans', sans-serif; }
   .app__header, .no-print, #login, #welcome, #quiz, .app__footer { display:none !important }
   #report{ display:block !important; border:none; box-shadow:none; }
   #report h2{ color:#000 }

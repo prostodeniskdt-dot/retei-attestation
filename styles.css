@@ -117,7 +117,7 @@ input[type="text"]{
 }
 .answer.selected{ outline:2px solid var(--primary) }
 
-.quiz__nav{ display:flex; justify-content:space-between; margin-top:8px }
+.quiz__nav{ display:flex; justify-content:space-between; margin-top:8px; gap:8px }
 .quiz__finish{ margin-top:14px; text-align:right }
 
 .quiz__progress{ color:var(--muted); margin-bottom:8px }
@@ -128,7 +128,6 @@ input[type="text"]{
   opacity:.9;
   border-top:1px solid var(--border);
 }
-
 
 /* === Mobile responsiveness tweaks === */
 @media (max-width: 920px){
@@ -143,7 +142,7 @@ input[type="text"]{
   .card{ padding:16px; margin-bottom:12px }
 
   .app__header{ flex-wrap:wrap; gap:8px }
-  .app__header h1{ font-size:20px; margin:0 }
+  .app__header h1{ font-size:20px; margin:0; flex: 1 1 100%; }
   .timer{ min-width:auto; padding:6px 10px; font-size:14px }
 
   .form-row input[type="text"]{ width:100%; font-size:16px } /* prevent iOS zoom */
@@ -152,11 +151,10 @@ input[type="text"]{
   .answers{ gap:10px }
   .answer{ padding:14px; line-height:1.25 }
 
-  .quiz__nav{ flex-direction: column; gap:10px }
+  .quiz__nav{ flex-direction: column; }
   .quiz__finish{ margin-top:10px }
   .quiz__progress{ font-size:14px }
 
-  /* report */
   #report .report__details .detail{ margin-bottom:12px }
 }
 

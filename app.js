@@ -1,4 +1,4 @@
-// SPA на ванильном JS (фикс статичного порядка ответов и завершения через «Далее»)
+// SPA: фиксированный порядок ответов, завершение через «Далее» и более надёжная печать PDF
 const $ = (s) => document.querySelector(s);
 
 // Экраны и элементы
@@ -29,7 +29,7 @@ const reportMetaEl = $("#reportMeta");
 const reportSummaryEl = $("#reportSummary");
 const reportDetailsEl = $("#reportDetails");
 
-const STORAGE_KEY = "retei_exam_v2";
+const STORAGE_KEY = "retei_exam_v3";
 
 let state = {
   employee: null,
@@ -182,6 +182,15 @@ function isTimeFailed(){
   return elapsed > DURATION_MS;
 }
 
+function buildEmployeeLine(){
+  const name = state.employee?.name?.trim();
+  const role = state.employee?.role?.trim();
+  if(!name && !role) return "—";
+  if(name && !role) return name;
+  if(!name && role) return role;
+  return `${name} (${role})`;
+}
+
 function finishExam(){
   state.finishedAt = Date.now();
   persist();
@@ -193,8 +202,8 @@ function finishExam(){
 
 function buildReport(){
   const meta = [];
-  meta.push(`<div><b>Сотрудник:</b> ${state.employee?.name ?? "—"}</div>`);
-  meta.push(`<div><b>Должность:</b> ${state.employee?.role ?? "—"}</div>`);
+  const empLine = buildEmployeeLine();
+  meta.push(`<div><b>Сотрудник:</b> ${empLine}</div>`);
   const started = new Date(state.startedAt).toLocaleString();
   const finished = new Date(state.finishedAt).toLocaleString();
   meta.push(`<div><b>Начал(а):</b> ${started}</div>`);
@@ -263,6 +272,54 @@ async function init(){
   updateTimer();
 }
 
+// Печать / PDF: более надёжный вариант с отдельным окном
+function printReport(){
+  const reportNode = document.querySelector("#report");
+  if(!reportNode){
+    alert("Отчёт не найден");
+    return;
+  }
+  const html = reportNode.innerHTML;
+
+  const win = window.open("", "_blank");
+  if(!win){
+    alert("Браузер заблокировал всплывающее окно. Разрешите его, чтобы скачать PDF.");
+    return;
+  }
+
+  const doc = `<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>Отчёт — Аттестация «Рётэй»</title>
+  <style>
+    body{
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, 'Noto Sans', 'PT Sans', sans-serif;
+      margin:20px;
+      color:#000;
+    }
+    h2{ margin-top:0; }
+    .correct{ color:#0a7d00; }
+    .wrong{ color:#b00020; }
+    .detail{ margin-bottom:10px; border-bottom:1px solid #ddd; padding-bottom:6px; }
+    .q{ margin-bottom:2px; }
+    .a,.r{ font-size:14px; }
+  </style>
+</head>
+<body>
+  ${html}
+</body>
+</html>`;
+
+  win.document.open();
+  win.document.write(doc);
+  win.document.close();
+  win.focus();
+  if(typeof win.print === "function"){
+    win.print();
+  }
+}
+
 // Слушатели
 loginBtn.addEventListener("click", () => {
   const name = empNameInput.value.trim();
@@ -289,7 +346,7 @@ prevBtn.addEventListener("click", () => goPrev());
 nextBtn.addEventListener("click", () => goNextOrFinish());
 finishBtn.addEventListener("click", () => finishExam());
 
-printBtn.addEventListener("click", () => window.print());
+printBtn.addEventListener("click", printReport);
 
 shareBtn.addEventListener("click", async () => {
   const started = new Date(state.startedAt).toLocaleString();
@@ -302,19 +359,22 @@ shareBtn.addEventListener("click", async () => {
   }, 0);
   const pct = Math.round((correct/total)*100);
   const timeStatus = isTimeFailed() ? "Провалено по времени" : "Уложился(лась) в 30 минут";
+  const empLine = buildEmployeeLine();
 
-  const text = `Аттестация «Рётэй»\nСотрудник: ${state.employee?.name} (${state.employee?.role})\nНачал(а): ${started}\nЗакончил(а): ${finished}\nИтог: ${correct}/${total} (${pct}%)\nСтатус времени: ${timeStatus}`;
+  const text = `Аттестация «Рётэй»\nСотрудник: ${empLine}\nНачал(а): ${started}\nЗакончил(а): ${finished}\nИтог: ${correct}/${total} (${pct}%)\nСтатус времени: ${timeStatus}`;
 
   try{
     if(navigator.share){
       await navigator.share({ title: "Отчёт — Аттестация «Рётэй»", text });
-    }else{
+    }else if(navigator.clipboard){
       await navigator.clipboard.writeText(text);
       alert("Итог скопирован в буфер обмена. Вставьте его в мессенджер и приложите PDF.");
+    }else{
+      alert(text);
     }
   }catch(e){
     console.error(e);
-    alert("Не удалось поделиться. Попробуйте скопировать вручную после «Скачать PDF».");
+    alert("Не удалось поделиться. Попробуйте скопировать вручную после формирования отчёта.");
   }
 });
 
