@@ -118,7 +118,7 @@ input[type="text"]{
 .answer.selected{ outline:2px solid var(--primary) }
 
 .quiz__nav{ display:flex; justify-content:space-between; margin-top:8px; gap:8px }
-.quiz__finish{ margin-top:14px; text-align:right }
+.quiz__finish{ margin топ:14px; text-align:right }
 
 .quiz__progress{ color:var(--muted); margin-bottom:8px }
 
@@ -128,6 +128,86 @@ input[type="text"]{
   opacity:.9;
   border-top:1px solid var(--border);
 }
+
+/* ОТЧЁТ — более читаемый вид */
+.report-block{
+  border-radius:12px;
+  border:1px solid var(--border);
+  padding:12px 14px;
+  margin-top:10px;
+  background:#0c0d0f;
+}
+.report-block h3{
+  margin-top:0;
+  margin-bottom:8px;
+  font-size:16px;
+}
+
+.meta-list{
+  margin:0;
+  padding:0;
+}
+.meta-row{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  padding:4px 0;
+  border-bottom:1px dashed rgba(255,255,255,0.06);
+  font-size:14px;
+}
+.meta-row:last-child{ border-bottom:none }
+.meta-label{ color:var(--muted); white-space:nowrap }
+.meta-value{ text-align:right }
+
+.summary-box{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  flex-wrap:wrap;
+}
+.summary-score{
+  min-width:90px;
+  text-align:center;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid rgba(255,212,0,0.4);
+  background:rgba(255,212,0,0.08);
+}
+.summary-score__value{
+  font-size:26px;
+  font-weight:800;
+}
+.summary-score__label{
+  font-size:12px;
+  text-transform:uppercase;
+  letter-spacing:0.04em;
+}
+.summary-text{
+  font-size:14px;
+}
+
+.summary-time{
+  margin-top:8px;
+  font-size:14px;
+}
+
+.details-list{
+  list-style:decimal;
+  padding-left:18px;
+  margin:0;
+}
+.detail-item{
+  margin-bottom:10px;
+  padding-bottom:8px;
+  border-bottom:1px solid rgba(255,255,255,0.05);
+}
+.detail-item:last-child{ border-bottom:none }
+
+.detail-q{ margin-bottom:4px; }
+.detail-q b{ margin-right:4px; }
+.detail-a,.detail-r{ font-size:13px; }
+.detail-a.correct{ color:#7adf7a; }
+.detail-a.wrong{ color:#ff6b81; }
 
 /* === Mobile responsiveness tweaks === */
 @media (max-width: 920px){
@@ -155,7 +235,7 @@ input[type="text"]{
   .quiz__finish{ margin-top:10px }
   .quiz__progress{ font-size:14px }
 
-  #report .report__details .detail{ margin-bottom:12px }
+  #report .report-block{ padding:10px 12px }
 }
 
 @media (max-width: 380px){
